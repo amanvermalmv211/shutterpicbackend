@@ -18,8 +18,32 @@ const BookingSchema = new Schema({
         type: String,
         required: true
     },
+    timeslot: {
+        type: String,
+        required: true
+    },
+    eventname: {
+        type: String,
+        required: true
+    },
     bookingdate: {
         type: Date,
+        required: true,
+        get: (bookingdate) => bookingdate.getTime(),
+        set: (bookingdate) => new Date(bookingdate)
+    },
+    bookingdate: {
+        type: Date,
+        required: true,
+        get: (bookingdate) => bookingdate.getTime(),
+        set: (bookingdate) => new Date(bookingdate)
+    },
+    currdate: {
+        type: String,
+        required: true
+    },
+    prize: {
+        type: String,
         required: true
     }
 });

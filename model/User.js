@@ -13,7 +13,8 @@ const UserSchema = new Schema({
     },
     type:{
         type: String,
-        required: true
+        required: true,
+        default: "customer"
     },
     isverified:{
         type: Boolean,

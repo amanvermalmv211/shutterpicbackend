@@ -13,7 +13,6 @@ dotenv.config();
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET;
 
-
 // Route 1 : Create user using : POST "/user/userauth/createuser"
 router.post('/createuser', async (req, res) => {
     let success = false;
@@ -48,7 +47,6 @@ router.post('/createuser', async (req, res) => {
         sendOTP(req, res);
     }
     catch (err) {
-        console.log(err.message);
         res.status(500).send("Internal server error occured.");
     }
 
@@ -85,7 +83,6 @@ router.post('/loginuser', async (req, res) => {
         res.json({ success, authtoken, type: user.type, message: "User loged in successfully" });
 
     } catch (err) {
-        console.log(err.message);
         res.status(500).send("Internal server error occured.");
     }
 
@@ -134,9 +131,11 @@ router.post('/verifyotp', async (req, res) => {
 
             const data = {
                 user: {
-                    id: user.id
+                    id: user.id,
+                    type: user.type
                 }
             }
+
             const authtoken = jwt.sign(data, JWT_SECRET);
             success = true;
             return res.status(200).json({ success, authtoken, type: user.type, message: "OTP Verified Successfully!" });
@@ -147,7 +146,76 @@ router.post('/verifyotp', async (req, res) => {
 
     }
     catch (err) {
-        console.log(err.message);
+        res.status(500).send("Internal server error occured.");
+    }
+
+});
+
+router.post('/request/resetpassword', async (req, res) => {
+    let success = false;
+
+    try {
+        let user = await User.findOne({ email: req.body.email });
+        if (!user) {
+            return res.status(500).json({ success, message: "User not found" });
+        }
+
+        sendOTP(req, res);
+
+    }
+    catch (err) {
+        res.status(500).send({ message: "Internal server error occured." });
+    }
+
+});
+
+router.post('/resetpassword', async (req, res) => {
+    let success = false;
+    const userdata = req.body;
+
+    try {
+        // check whether the user with the email exists already.
+        let userotp = await OTPVerification.findOne({ email: userdata.email });
+        if (!userotp) {
+            return res.status(400).json({ success, message: "User doesn't exist." })
+        }
+
+        const currDate = new Date();
+
+        if (currDate.getTime() <= (userotp.timestamp + 120000)) {
+            const otpCompare = await bcrypt.compare(userdata.otp, userotp.otp);
+            if (!otpCompare) {
+                return res.status(400).json({ success, message: "OTP does not matched." });
+            }
+
+            const salt = await bcrypt.genSalt(10);
+            const secPass = await bcrypt.hash(userdata.password, salt);
+
+            const newUser = {
+                password: secPass
+            };
+
+            let user = await User.findOneAndUpdate({ email: userdata.email }, { $set: newUser }, { new: true });
+
+            await OTPVerification.findOneAndDelete({ email: userdata.email });
+
+            const data = {
+                user: {
+                    id: user.id,
+                    type: user.type
+                }
+            }
+
+            const authtoken = jwt.sign(data, JWT_SECRET);
+            success = true;
+            return res.status(200).json({ success, authtoken, type: user.type, message: "Password has been reset successfully!" });
+        }
+        else {
+            return res.status(400).json({ success: false, message: "Time limit exceed. Please try again." });
+        }
+
+    }
+    catch (err) {
         res.status(500).send("Internal server error occured.");
     }
 
@@ -169,7 +237,6 @@ router.get('/getuser', fetchuser, async (req, res) => {
         return res.status(200).json({ success, data: customer });
     }
     catch (err) {
-        console.log(err.message);
         res.status(500).send({ message: "Internal server error occured." });
     }
 

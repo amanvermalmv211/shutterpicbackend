@@ -14,7 +14,7 @@ const OTPSchema = new Schema({
     timestamp: {
         type: Date,
         default: Date.now,
-        require: true,
+        required: true,
         get: (timestamp) => timestamp.getTime(),
         set: (timestamp) => new Date(timestamp)
     }
