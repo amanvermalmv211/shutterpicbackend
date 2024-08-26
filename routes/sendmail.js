@@ -8,7 +8,7 @@ dotenv.config();
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-        user: 'amanvermalmv211@gmail.com',
+        user: 'shutterpicsstudio@gmail.com',
         pass: process.env.MAIL_PASS
     }
 })
@@ -17,7 +17,7 @@ async function sendOTP(req, res) {
     const otp = `${Math.floor(1000 + Math.random() * 9000)}`;
 
     const optGeneration = {
-        from: 'amanvermalmv211@gmail.com',
+        from: 'shutterpicsstudio@gmail.com',
         to: req.body.email,
         subject: 'ShutterPics : Verify your account!',
         html: `<p>OTP for verification at shutterpics.in is : <b>${otp}</b>.<br>This code is expires within 2 minutes.</p>`
@@ -79,7 +79,7 @@ export async function contactus(req, res) {
     `;
 
     const contactDetails = {
-        from: 'amanvermalmv211.com',
+        from: 'shutterpicsstudio@gmail.com',
         to: 'shutterpicsstudio@gmail.com',
         subject: 'ShutterPics : Someone wanna contact you!',
         html: message
@@ -117,7 +117,7 @@ export async function bookingmail(req, res) {
     `;
 
     const contactDetails = {
-        from: 'amanvermalmv211.com',
+        from: 'shutterpicsstudio@gmail.com',
         to: 'shutterpicsstudio@gmail.com',
         subject: 'ShutterPics : Someone wanna book the date!',
         html: message
